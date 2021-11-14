@@ -1,4 +1,3 @@
-import tqdm
 import socket
 import os
 import json

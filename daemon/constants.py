@@ -16,6 +16,7 @@ class Constants:
 
 	########
 
+	DAEMON_HTTP_SERVER_PORT = 7836
 	MAX_SOCKET_QUEUE = 5
 	BUFFER_SIZE = 10 * 1024 * 1024
 

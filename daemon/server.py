@@ -8,6 +8,7 @@ import asyncio
 from net.ashost import sendSingleFile
 from net.asclient import recvSingleFile, asClientOpenSockets, asClientTransfers, getConnectionSocket
 from net.util.transfer import Transfer
+from constants import CONSTANTS
 
 app = Flask(__name__)
 
@@ -82,6 +83,7 @@ def transferProgress():
 			"status": "active",
 			"transferName": transfer.transferName,
 			"totalBytes": transfer.totalBytes,
+			"completedBytes": transfer.completedBytes,
 			"transferRate": transfer.currentTransferRate,
 			"percentCompletion": transfer.percentCompletion()
 		}, 200
@@ -99,4 +101,4 @@ def newTransfer(role):
 
 	return transfer
 
-app.run(port = 7836)
+app.run(host = "0.0.0.0", port = CONSTANTS.DAEMON_HTTP_SERVER_PORT)
