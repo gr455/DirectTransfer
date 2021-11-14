@@ -3,6 +3,19 @@ Send and recv files with people around you with ease and speed
 
 DirectTransfer provides an easy way to share files with people around you or on the current network. It uses TCP over sockets to transfer files and folders, completely peer to peer. The aim of DirectTransfer is for user to be able to share files with as less clicks/keypresses as possible and quick.
 
+## Topology
+
+![Topology Diagram](https://user-images.githubusercontent.com/53974118/141687531-1e5d29ab-4cb3-466a-8156-43ce7544829d.png)
+
+1. UI initiates a send (from the Host machine)
+2. Host machine talks to the HTTP server of the Client machine, asking for an open TCP port
+3. Client UI tells the Client HTTP server to open the TCP port
+4. Client HTTP server queries to open a TCP port
+5. Client HTTP server retrieves the opened port number
+6. Client HTTP server sends the port number to Host HTTP server
+7. Host HTTP server queries to send the file to the retrieved port
+8. Host sends the file to the Client through the now established TCP connection
+
 As a user, there are two ways I can send files:
 
 A send is initiated by me to a client, the client accepts the file
@@ -43,8 +56,4 @@ Options:
   * `daemon/net/` contains all the TCP network code
     * `daemon/net/asclient.py` contains code for peer acting as a client (recieving files)
     * `daemon/net/ashost.py` contains code for peer acting as a host (sending files)
-
-## Topology
-
-![Untitled Diagram](https://user-images.githubusercontent.com/53974118/141684799-5d9c4104-44c4-499a-a32a-bccfbd8bd8ea.png)
 
