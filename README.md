@@ -29,6 +29,21 @@ I expose an index of files that client can request from me, the client requests 
 
 ## Usage
 
+To setup the development environment, first install all the dependencies
+
+```
+pip install -r requirements.txt
+```
+
+Then manually start the server
+
+### Server (Development)
+```
+python daemon/server.py
+```
+
+Then use the CLI to interact with the server
+
 ### CLI
 
 DirectTransfer provides a simple Command Line Interface to send files
