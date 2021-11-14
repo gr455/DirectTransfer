@@ -2,8 +2,17 @@ import tqdm
 import socket
 import os
 import json
+import asyncio
 
 from constants import CONSTANTS
+
+asClientOpenSockets = {} # "<id>": <socket object> 
+
+def fire_and_forget(f):
+	def wrapped(*args, **kwargs):
+		return asyncio.get_event_loop().run_in_executor(None, f, *args, *kwargs)
+
+	return wrapped
 
 # Listens for file to be saved at @param directoryPath with the passed socket 
 # @param connSocket
@@ -59,22 +68,23 @@ def recvFile(directoryPath, connSocket):
 			progress.update(len(bytesRecvd))
 
 
-def recvSingleFile(directoryPath, clientHost, clientPort):
-	# Create socket connection
-	connSocket = getConnectionSocket(clientHost, clientPort)
-
+@fire_and_forget
+def recvSingleFile(connId, directoryPath, connSocket):
 	# Recv the file
 	status = recvFile(directoryPath, connSocket)
 
 	# Close socket
 	connSocket.close()
+	del asClientOpenSockets[connId]
 
 	return status
 
-def getConnectionSocket(clientHost, clientPort):
+def getConnectionSocket(connId, clientHost, clientPort):
 	sock = socket.socket()
 	sock.bind((clientHost, clientPort))
 	sock.listen(CONSTANTS.MAX_SOCKET_QUEUE)
+
+	asClientOpenSockets[connId] = sock
 
 	return sock
 
