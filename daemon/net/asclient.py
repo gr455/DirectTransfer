@@ -4,9 +4,11 @@ import os
 import json
 import asyncio
 
+from net.util.progress import Progress
 from constants import CONSTANTS
 
 asClientOpenSockets = {} # "<id>": <socket object> 
+asClientTransfers = {}
 
 def fire_and_forget(f):
 	def wrapped(*args, **kwargs):
@@ -16,7 +18,7 @@ def fire_and_forget(f):
 
 # Listens for file to be saved at @param directoryPath with the passed socket 
 # @param connSocket
-def recvFile(directoryPath, connSocket):
+def recvFile(connId, directoryPath, connSocket):
 
 	# Check if system user can write to the given directory and it exists
 	directoryExists = checkDirectoryExistence(directoryPath)
@@ -38,14 +40,8 @@ def recvFile(directoryPath, connSocket):
 	filePath = os.path.join(directoryPath, fileName)
 	fileSize = int(metadata["bsize"])
 
-	# Now recieve file content
-	progress = tqdm.tqdm(
-		range(fileSize),
-		f"Recieving {fileName}", 
-		unit = "B",
-		unit_scale = True, 
-		unit_divisor = 1024
-	)
+	progress = Progress(fileSize, fileName)
+	asClientTransfers[connId] = progress
 
 	with open(filePath, "wb") as file:
 		iters = 0
@@ -68,14 +64,16 @@ def recvFile(directoryPath, connSocket):
 			progress.update(len(bytesRecvd))
 
 
+# Listens for and recieves one single file by a transfer
 @fire_and_forget
 def recvSingleFile(connId, directoryPath, connSocket):
 	# Recv the file
-	status = recvFile(directoryPath, connSocket)
+	status = recvFile(connId, directoryPath, connSocket)
 
 	# Close socket
 	connSocket.close()
 	del asClientOpenSockets[connId]
+	del asClientTransfers[connId]
 
 	return status
 

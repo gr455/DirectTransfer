@@ -2,11 +2,21 @@ import tqdm
 import socket
 import os
 import json
+import asyncio
 
 from constants import CONSTANTS
+from net.util.progress import Progress
+
+asHostTransfers = {}
+
+def fire_and_forget(f):
+	def wrapped(*args, **kwargs):
+		return asyncio.get_event_loop().run_in_executor(None, f, *args, *kwargs)
+
+	return wrapped
 
 # Sends file at @param filePath over TCP with the passed socket @param connSocket
-def sendFile(filePath, connSocket):
+def sendFile(connId, filePath, connSocket):
 
 	# Check if the file exists and system user has read permissions
 	fileExists = checkFileExistence(filePath)
@@ -19,14 +29,11 @@ def sendFile(filePath, connSocket):
 	fileMetadata = getFileMetadata(filePath)
 	sendFileMetadata(connSocket, fileMetadata)
 
-	# Now send file content
-	progress = tqdm.tqdm(
-		range(fileMetadata["bsize"]),
-		f"Sending {fileMetadata['name']}", 
-		unit = "B",
-		unit_scale = True, 
-		unit_divisor = 1024
-	)
+	fileName = fileMetadata["name"]
+	fileSize = fileMetadata["bsize"]
+
+	progress = Progress(fileSize, fileName)
+	asHostTransfers[connId] = progress
 
 	with open(filePath, "rb") as file:
 		iters = 0
@@ -48,13 +55,13 @@ def sendFile(filePath, connSocket):
 			progress.update(len(bytesRead))
 
 # Sends a single file and closes the TCP connection
-def sendSingleFile(filePath, clientHost, clientPort):
+@fire_and_forget
+def sendSingleFile(connId, filePath, clientHost, clientPort):
 	# Create socket connection
 	connSocket = getConnectionSocket(clientHost, clientPort)
 
 	# Emit the file
-	status = sendFile(filePath, connSocket)
-	print("Done")
+	status = sendFile(connId, filePath, connSocket)
 	# Close socket
 	connSocket.close()
 
@@ -94,4 +101,3 @@ def getFileMetadata(filePath):
 	meta["bsize"] = os.stat(filePath).st_size
 
 	return meta
-
