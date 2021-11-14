@@ -1,0 +1,4 @@
+requests==2.22.0
+tqdm==4.59.0
+Flask==2.0.2
+Click==7.0
