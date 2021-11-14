@@ -73,13 +73,15 @@ def recieveFile(directoryPath = "."):
 		unit_divisor = 1024
 	)
 
+	totalBytes = transfer["totalBytes"]
+
 	while True:
 		pastCompletedBytes = transfer["completedBytes"] 
 		transferResponse = requests.get(f"{selfHttpServer}/transferProgress?tid={transferID}")
 		transfer = json.loads(transferResponse.text)
 
 		if transfer["status"] == "inactive":
-			progress.update(transfer["totalBytes"] - pastCompletedBytes)
+			progress.update(totalBytes - pastCompletedBytes)
 			break
 
 		progress.update(transfer["completedBytes"] - pastCompletedBytes)
