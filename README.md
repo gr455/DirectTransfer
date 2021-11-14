@@ -44,4 +44,7 @@ Options:
     * `daemon/net/asclient.py` contains code for peer acting as a client (recieving files)
     * `daemon/net/ashost.py` contains code for peer acting as a host (sending files)
 
+## Topology
+
+![Untitled Diagram](https://user-images.githubusercontent.com/53974118/141684799-5d9c4104-44c4-499a-a32a-bccfbd8bd8ea.png)
 
