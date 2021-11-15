@@ -23,22 +23,22 @@ def sendFile(filePath, clientHost):
 
 	clientHttpServer = f"http://{clientHost}:{DAEMON_HTTP_SERVER_PORT}"
 	selfHttpServer = f"http://0.0.0.0:{DAEMON_HTTP_SERVER_PORT}"
-	# knock knock knocking on client's door. Get port
 
-	if not pingSelfServer(): return print("[-] Daemon server is not running. Aborting")
-	print("[+] Daemon Server running")
+	if not pingSelfServer(): return click.echo(click.style("Fatal: Daemon server is not running. Aborting", fg="red"))
+	click.echo(click.style("[+] Daemon Server running", fg="green"))
 	if not pingPeerServer(clientHost): return print("[-] Peer did not respond. Aborting")
-	print("[+] Client up, knocking for port")
+	click.echo(click.style("[+] Client up, knocking for port", fg="green"))
 
+	# knock knock knocking on client's door. Get port
 	knock = requests.get(f"{clientHttpServer}/knock")
 	port = json.loads(knock.text)["port"]
 
-	print("[+] Client port retrieved")
+	click.echo(click.style("[+] Client port retrieved", fg="green"))
 
 	sendRequest = {"file": filePath, "clientHost": clientHost, "clientPort": port}
 
 	requests.post(f"{selfHttpServer}/sendSingle", json = sendRequest)
-	print("[+] Sending file")	
+	click.echo(click.style("[+] Sending file", fg="green"))
 
 
 def recieveFile(directoryPath = "."):
@@ -82,10 +82,11 @@ def recieveFile(directoryPath = "."):
 
 		if transfer["status"] == "inactive":
 			progress.update(totalBytes - pastCompletedBytes)
+			click.echo(click.style("\n[+] Transfer finished", fg="green"))
 			break
 
 		progress.update(transfer["completedBytes"] - pastCompletedBytes)
-		time.sleep(1)				
+		time.sleep(0.5)				
 
 
 
@@ -96,13 +97,15 @@ def recieveFile(directoryPath = "."):
 @click.option("-p", type = str, help = "File or directory path")
 def cli(action, c, p):
 	if action == "send":
-		if not c: click.echo(click.style("Error", fg="red") + ": No client IP passed")
-		if not p: click.echo(click.style("Error", fg="red") + ": No file path passed")
-		sendFile(p, c)
+		if not c: return click.echo(click.style("Fatal: No client IP passed", fg="red"))
+		if not p: return click.echo(click.style("Fatal: No file path passed", fg="red"))
+		try: sendFile(p, c)
+		except Exception as e: click.echo(click.style("Fatal: Something went wrong while transferring", fg="red"))
 
 	elif action == "receive":
-		if not p: click.echo(click.style("Error", fg="red") + ": No directory path passed")
-		recieveFile(p)
+		if not p: return click.echo(click.style("Fatal: No directory path passed", fg="red"))
+		try: recieveFile(p)
+		except Exception as e: click.echo(click.style("Fatal: Something went wrong while transferring", fg="red"))
 
 	else:
 		click.echo(click.get_current_context().get_help())
