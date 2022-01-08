@@ -3,7 +3,7 @@ Send and recv files with people around you with ease and speed
 
 DirectTransfer provides an easy way to share files with people around you or on the current network. It uses TCP over sockets to transfer files and folders, completely peer to peer. DirectTransfer allows the user to send or receive multiple files / folders with or from multiple devices at the same time, parallely.
 
-## Topology
+## Flow
 
 ![Topology Diagram](https://user-images.githubusercontent.com/53974118/141687531-1e5d29ab-4cb3-466a-8156-43ce7544829d.png)
 
